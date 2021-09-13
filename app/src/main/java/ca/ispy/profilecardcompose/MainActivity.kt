@@ -12,12 +12,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,14 +62,17 @@ fun UsersApplication(userProfiles: List<UserProfile> = userProfileList) {
             arguments = listOf(navArgument("userId") {
             type = NavType.IntType
         } )) { navBackStackEntry ->
-            UserProfileDetailsScreen(navBackStackEntry.arguments!!.getInt("userId"))
+            UserProfileDetailsScreen(navBackStackEntry.arguments!!.getInt("userId"), navController)
         }
     }
 }
 
 @Composable
 fun MainScreen(userProfiles: List<UserProfile>, navController: NavHostController?) {
-    Scaffold(topBar = { AppBar() }) {
+    Scaffold(topBar = { AppBar(
+        "Users List",
+        Icons.Default.Home) {}
+        }) {
         androidx.compose.material.Surface(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -86,12 +91,17 @@ fun MainScreen(userProfiles: List<UserProfile>, navController: NavHostController
 }
 
 @Composable
-fun UserProfileDetailsScreen(userId: Int) {
+fun UserProfileDetailsScreen(userId: Int, navController: NavHostController?) {
     val userProfile = userProfileList.first { userProfile ->
         userId == userProfile.id
     } //iterates and searches for the first element with condition (doesnt save)
 
-    Scaffold(topBar = { AppBar() }) {
+    Scaffold(topBar = { AppBar(
+        "Users Details",
+        Icons.Default.ArrowBack) {
+        navController?.navigateUp()
+    }
+        }) {
         androidx.compose.material.Surface(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -112,16 +122,18 @@ fun UserProfileDetailsScreen(userId: Int) {
 }
 
 @Composable
-fun AppBar() {
+fun AppBar(title: String, icon: ImageVector, iconClickAction: () -> Unit) {
     TopAppBar(
         navigationIcon = {
             Icon(
-                Icons.Default.Home,
+                imageVector = icon,
                 contentDescription = "content description",
-                modifier = Modifier.padding(horizontal = 12.dp)
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .clickable { iconClickAction.invoke() }
             )
                          },
-        title = { Text(text = "Profile Cards")}
+        title = { Text(text = title)}
     )
 }
 
@@ -209,7 +221,7 @@ fun ProfilePicture(pictureUrl: String, onlineStatus: Boolean, imageSize: Dp) {
 @Composable
 fun UserProfilePreview() {
     ProfileCardComposeTheme {
-        UserProfileDetailsScreen(userId = 0)
+        UserProfileDetailsScreen(userId = 0, null)
     }
 }
 
